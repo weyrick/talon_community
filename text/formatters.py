@@ -119,6 +119,7 @@ ctx.keymap(
         "sentence <dgndictation> [over]": sentence_text,
         "(comma | ,) <dgndictation> [over]": [", ", spoken_text],
         "period <dgndictation> [over]": [". ", sentence_text],
+        "quip <dgndictation> [over]": [" ", spoken_text],
         "word <dgnwords>": word,
         "(%s)+ [<dgndictation>] [over]" % (" | ".join(formatters)): FormatText,
         # to match surrounder command + another command (i.e. not dgndictation)
