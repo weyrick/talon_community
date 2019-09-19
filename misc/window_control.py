@@ -1,6 +1,7 @@
 from os import system
 
 from talon.voice import Context, Key, press
+from talon import macos
 from ..utils import parse_words_as_integer
 
 ctx = Context("window_control")
@@ -27,17 +28,22 @@ ctx.keymap(
         "zoom normal": Key("cmd-0"),
         # window control
         "(open | new) window": Key("cmd-n"),
-        "window close": Key("cmd-shift-w"),
+        "close window": Key("cmd-shift-w"),
         "([switch] window (next | right) | gibby)": Key("cmd-`"),
         "([switch] window (left | previous | preev) | shibby)": Key("cmd-shift-`"),
         "[switch] space (right | next)": Key("ctrl-right"),
         "[switch] space (left | previous | preev)": Key("ctrl-left"),
         "(minimise window | curtail)": Key("cmd-m"),
-        "show app windows": Key("ctrl-down"),
+        "([show] (app | application) windows | expozay)": lambda m: macos.dock_notify("com.apple.expose.front.awake"),
+        "quit it": Key("cmd-q"),
         # application navigation
         "[open] launcher": Key("cmd-space"),
         "([switch] app (next | right) | swick)": Key("cmd-tab"),
         "[switch] app (left | previous | preev)": Key("cmd-shift-tab"),
-        "[open] mission control": lambda m: system("open -a 'Mission Control'"),
+        "[open] mission control": lambda m: macos.dock_notify("com.apple.expose.awake"),
+        "[open] launchpad": lambda m: macos.dock_notify("com.apple.launchpad.toggle"),
+		# the following requires keyboard shortcut for mission control in System Preferences > Keyboard > Shortcuts > Mission Control > Show Notification Center.
+		# is there a bundle id we can use instead?
+        "([(open | show)] notification center | ( (show | open) (today | widgets) ))": Key("shift-ctrl-f8"),
     }
 )
