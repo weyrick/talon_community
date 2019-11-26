@@ -28,7 +28,11 @@ def open_most_recently_downloaded_file(m):
 def get_url(win=None):
     if win is None:
         win = ui.active_window()
-    return tuple(win.children.find(AXRole="AXTextField")[0].AXValue)[0].AXValue
+    children = win.children.find(AXRole="AXTextField")
+    if children:
+        return children[0].AXValue
+    else:
+        return None
 
 
 def set_url(url, win=None):
@@ -55,6 +59,15 @@ def show_panel(name):
 
     Str("Show %s" % (name))(None)
     press("enter")
+
+
+def new_tab(m):
+    print("hidden", ui.active_window().hidden)
+    print(ui.active_window().children)
+    if not ui.active_window().hidden:
+        press("cmd-t")
+    else:
+        press("cmd-n")
 
 
 def next_panel(m):
@@ -90,7 +103,8 @@ def back(m):
 
 def forward(m):
     refocus_page(None)
-    press("cmd-]")
+    time.sleep(0.1)
+    press("cmd-right")
     refocus_page(None)
 
 
@@ -116,13 +130,21 @@ def get_webpage(m):
     return webpages[" ".join(m["global_browser.webpages"])]
 
 
-def go_to_webpage(m):
+def new_tab_go_to_webpage(m):
     press("cmd-t")
     navigate_to_url(get_webpage(m))
 
 
-def get_search(m):
-    return searches[" ".join(m["global_browser.searches"])]
+def go_to_webpage(m):
+    navigate_to_url(get_webpage(m))
+
+
+def get_search(m, default="google"):
+    key = " ".join(m["global_browser.searches"])
+    if key in searches:
+        return searches[key]
+    else:
+        return default
 
 
 searches = config.load_config_json("searches.json")
@@ -150,6 +172,10 @@ def new_search_existing_tab(m):
         press("enter")
 
 
+def open_way_back_machine(m):
+    browser.navigate_to_url(f"http://web.archive.org/web/{browser.get_url()}")
+
+
 context.keymap(
     {
         "(address bar | focus address | focus url | url)": focus_address_bar,
@@ -159,9 +185,11 @@ context.keymap(
         "page reload": Key("cmd-r"),
         "reload page": Key("cmd-r"),
         "hard reload": Key("cmd-shift-r"),
-        "new tab": Key("cmd-t"),
-        "new tab {global_browser.webpages}": go_to_webpage,
-        "new search {global_browser.searches} [<dgndictation>]": new_search_new_tab,
+        "new tab": new_tab,
+        "new tab {global_browser.webpages}": new_tab_go_to_webpage,
+        "go {global_browser.webpages}": go_to_webpage,
+        "new search [{global_browser.searches}] [<dgndictation>]": new_search_new_tab,
+        "go search [{global_browser.searches}] [<dgndictation>]": new_search_existing_tab,
         "search {global_browser.searches} [<dgndictation>]": new_search_existing_tab,
         "close tab": Key("cmd-w"),
         "(reopen | unclose) tab": Key("cmd-shift-t"),
@@ -171,7 +199,7 @@ context.keymap(
         "(end | rightmost) tab": Key("cmd-9"),
         "marco": Key("cmd-f"),
         "marneck": Key("cmd-g"),
-        "(last | prevous)": Key("cmd-shift-g"),
+        "marprev": Key("cmd-shift-g"),
         "toggle dev tools": Key("cmd-alt-i"),
         "command menu": Key("cmd-shift-p"),
         "next panel": next_panel,
@@ -188,9 +216,9 @@ context.keymap(
         "(refocus | focus) page": refocus_page,
         "[refocus] dev tools": open_focus_devtools,
         # Clipboard
-        "cut": Key("cmd-x"),
-        "copy": Key("cmd-c"),
-        "paste": Key("cmd-v"),
+        # "cut": Key("cmd-x"),
+        # "copy": Key("cmd-c"),
+        # "paste": Key("cmd-v"),
         "paste same style": Key("cmd-alt-shift-v"),
         # "mendeley": Key("cmd-shift-m"),
         "(add | save) to mendeley": mendeley,
@@ -203,7 +231,7 @@ context.keymap(
         # "move tab right": Key("ctrl-shift-right"),
         # "move tab left way": Key("ctrl-shift-down"),
         # vimium
-        "link": link,
+        "open link": link,
         "move tab left": browser.send_to_vimium("<<"),
         "move tab right": browser.send_to_vimium(">>"),
         "move tab new window": browser.send_to_vimium("W"),
@@ -215,7 +243,10 @@ context.keymap(
             lambda m: time.sleep(0.0),
             Key("enter"),
         ],
+        "pin tab": Key("alt-p"),
         "open most recently downloaded file": open_most_recently_downloaded_file,
+        # archive.org
+        "open [in] (way back [machine] | archive)": open_way_back_machine,
     }
 )
 
@@ -227,7 +258,12 @@ def global_chrome_new_tab(m):
 
 def global_go_to_webpage(m):
     switcher.switch_app(name="Google Chrome")
-    go_to_webpage(m)
+    new_tab_go_to_webpage(m)
+
+
+def global_chrome_new_search(m):
+    switcher.switch_app(name="Google Chrome")
+    new_search_new_tab(m)
 
 
 def global_chrome_close_tab(m):
@@ -250,6 +286,12 @@ global_ctx.keymap(
         "chrome search [<dgndictation>]": [global_chrome_new_tab, utils.text, " "],
         "chrome lucky [<dgndictation>]": [
             global_chrome_new_tab,
+            "lucky ",
+            utils.text,
+            " ",
+        ],
+        "chrome {global_browser.searches} [<dgndictation>]": [
+            global_chrome_new_search,
             "lucky ",
             utils.text,
             " ",

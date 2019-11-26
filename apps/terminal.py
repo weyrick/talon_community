@@ -37,6 +37,7 @@ def dash(m):
 
 
 KUBERNETES_PREFIX = "(cube | cube control)"
+DEFAULT_SSH = "mosh"
 
 directory_shortcuts = {
     "up": "..",
@@ -91,7 +92,7 @@ def ssh_copy_id_servers(m):
 
 def new_server(m):
     press("cmd-d")
-    insert(f"ssh {get_server(m)}")
+    insert(f"{DEFAULT_SSH} {get_server(m)}")
     press("enter")
 
 
@@ -105,7 +106,7 @@ keymap = {
     "(pain new | split vertical)": Key("cmd-d"),
     "new [S S H] [tab] {global_terminal.servers}": new_server,
     # talon
-    "tail talon": "tail -f ~/.talon/talon.log",
+    "tail talon [log]": "tail -f ~/.talon/talon.log",
     "talon reple": "~/.talon/bin/repl",
     "reverse": Key("ctrl-r"),
     "rerun": [Key("up"), Key("enter")],
@@ -143,6 +144,7 @@ keymap = {
     ],
     "pseudo shut down now": "sudo shutdown now",
     "shell C H mod": "chmod ",
+    "shell curl": "curl ",
     "shell (make executable | add executable permissions)": "chmod a+x ",
     "shell clear": [Key("ctrl-c"), "clear\n"],
     "shell copy [<dgndictation>]": ["cp ", text],
@@ -163,11 +165,13 @@ keymap = {
     "shell less [<dgndictation>]": ["less ", text],
     "shell cat [<dgndictation>]": ["cat ", text],
     "shell X args [<dgndictation>]": ["xargs ", text],
+    "shall W get": "wget ",
     "shell mosh": "mosh ",
     "[shell] mosh {global_terminal.servers}": mosh_servers,
     "[shell] (S S H | SSH) {global_terminal.servers}": ssh_servers,
     # "shell server {terminal.servers}": name_servers,
     "[shell] S S H copy I D {global_terminal.servers}": ssh_copy_id_servers,
+    "[shell] copy key {global_terminal.servers}": ssh_copy_id_servers,
     "shell M player": "mplayer ",
     "shell nvidia S M I": "nvidia-smi ",
     "shell R sync": "./src/dotfiles/sync_rsync ",
@@ -188,6 +192,14 @@ keymap = {
     "apt get install": "apt-get install ",
     "apt get update": "apt-get update ",
     "apt get upgrade": "apt-get upgrade ",
+    "apt get auto remove": "apt-get autoremove ",
+    "apt get auto clean": "apt-get autoclean ",
+    "apt get remove": "apt-get remove ",
+    "apt get purge": "apt-get purge ",
+    "apt get clean": "apt-get clean ",
+    "apt get check": "apt-get check ",
+    "apt get source": "apt-get source ",
+    "apt get download": "apt-get download ",
     # Tools
     # "(grep | grip)": ["grep  .", Key("left left")],
     "(grep | grip)": "grep ",
@@ -240,7 +252,6 @@ keymap = {
     KUBERNETES_PREFIX + "patch": "kubectl patch ",
     KUBERNETES_PREFIX + "replace": "kubectl replace ",
     KUBERNETES_PREFIX + "convert": "kubectl convert ",
-    KUBERNETES_PREFIX + "label": "kubectl label ",
     KUBERNETES_PREFIX + "annotate": "kubectl annotate ",
     KUBERNETES_PREFIX + "completion": "kubectl completion ",
     KUBERNETES_PREFIX + "api": "kubectl api ",
@@ -255,10 +266,10 @@ keymap = {
     "conda install": "conda install ",
     "conda list": "conda list ",
     # tmux
-    "T mux new session": "tmux ",
-    "T mux list": "tmux ls",
-    "T mux attach [<dgndictation>]": ["tmux a -t ", text],
-    "T mux scroll": [Key("ctrl-b"), Key("[")],
+    "(T mux | teemucks) list": "tmux ls",
+    "(T mux | teemucks) new session [<dgndictation>]": ["tmux new-session -t ", text],
+    "(T mux | teemucks) attach [<dgndictation>]": ["tmux a -t ", text],
+    "(T mux | teemucks) scroll": [Key("ctrl-b"), Key("[")],
     # other
     "shell make": "make\n",
     "shell jobs": "jobs\n",
@@ -309,6 +320,27 @@ keymap = {
     "ross topic list   ": "rostopic list ",
     "ross topic pub    ": "rostopic pub ",
     "ross topic type   ": "rostopic type ",
+    # supervisorctl
+    "supervisor control": "supervisorctl ",
+    "supervisor control status": "supervisorctl status",
+    # dat
+    "dat": "dat ",
+    "dat share": "dat share ",
+    "dat create": "dat create ",
+    "dat sync": "dat sync ",
+    "dat clone": "dat clone ",
+    "dat pull": "dat pull ",
+    "dat sync": "dat sync ",
+    "dat log": "dat log ",
+    "dat status": "dat status ",
+    "dat register": "dat register ",
+    "dat login": "dat login ",
+    "dat publish": "dat publish ",
+    "dat whoami": "dat whoami ",
+    "dat logout": "dat logout ",
+    "dat doctor": "dat doctor ",
+    "dat help": "dat help ",
+    "dat version": "dat version ",
 }
 
 for pip in ("pip", "pip3"):
@@ -326,7 +358,7 @@ for pip in ("pip", "pip3"):
         }
     )
 
-for action in ("get", "delete", "describe"):
+for action in ("get", "delete", "describe", "label"):
     for object in (
         "nodes",
         "jobs",
@@ -336,6 +368,7 @@ for action in ("get", "delete", "describe"):
         "events",
         "deployments",
         "replicasets",
+        "daemonsets",
         "",
     ):
         if object:

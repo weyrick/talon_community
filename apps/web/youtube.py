@@ -42,7 +42,7 @@ def youtube_download(video=True):
 
 
 context = Context(
-    "youtube", func=browser.url_matches_func("https://www.youtube.com/.*")
+    "youtube", func=browser.url_matches_func("https://youtube.com/.*")
 )
 context.keymap(
     {
@@ -50,5 +50,6 @@ context.keymap(
         "download video": youtube_download_video,
         "speed up": browser.send_to_page(">"),
         "speed down": browser.send_to_page("<"),
+        "full screen": browser.send_to_page("f"),
     }
 )

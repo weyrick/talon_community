@@ -1,7 +1,6 @@
 import collections
 import json
 import os
-import string
 from time import sleep
 
 from talon import clip, resource
@@ -22,6 +21,24 @@ for k, v in mapping.items():
     mappings[len(k.split(" "))][k] = v
 
 punctuation = set(".,-!?/")
+
+
+ordinal_indexes = {
+    "first": 0,
+    "second": 1,
+    "third": 2,
+    "fourth": 3,
+    "fifth": 4,
+    "sixth": 5,
+    "seventh": 6,
+    "eighth": 7,
+    "ninth": 8,
+    "tenth": 9,
+    "final": -1,
+    "next": "next",  # Yeah, yeah, not a number.
+    "last": "last",
+    "this": "this",
+}
 
 
 def local_filename(file, name):
@@ -61,6 +78,8 @@ def replace_words(words, mapping, count):
 def remove_dragon_junk(word):
     if word == ".\\point\\point":
         return "point"
+    elif word == ".\\period\\period":
+        return "period"
     else:
         return str(word).lstrip("\\").split("\\", 1)[0].replace("-", " ").strip()
 
@@ -150,26 +169,6 @@ def word(m):
         insert(text.lower())
     except AttributeError:
         pass
-
-
-def surround(left_surrounder, right_surrounder=None):
-    def func(i, word, last):
-        if i == 0:
-            word = left_surrounder + word
-        if last:
-            word += right_surrounder or left_surrounder
-        return word
-
-    return func
-
-
-def rot13(i, word, _):
-    out = ""
-    for c in word.lower():
-        if c in string.ascii_lowercase:
-            c = chr((((ord(c) - ord("a")) + 13) % 26) + ord("a"))
-        out += c
-    return out
 
 
 numeral_map = dict((str(n), n) for n in range(0, 10))
